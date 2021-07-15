@@ -1,10 +1,8 @@
+import preval from "preval.macro";
 import React from "react";
-import GitInfo from "react-git-info/macro";
 
 const About = () => {
-  const gitInfo = GitInfo();
-  const date = new Date();
-  date.setTime(Date.parse(gitInfo.commit.date));
+  const dateTimeStamp = preval`module.exports = new Date().toLocaleString();`;
 
   return (
     <main id="informations">
@@ -47,20 +45,16 @@ const About = () => {
       </details>
 
       <table id="app-version">
-        <tbody>
+        <tr>
+          <td> Version : </td>
+          <td>{process.env.REACT_APP_VERSION ?? "développement"}</td>
+        </tr>
+        {process.env.NODE_ENV !== "development" && (
           <tr>
-            <td>Date de version : </td>
-            <td>
-              {process.env.NODE_ENV === "production"
-                ? date.toLocaleString().split("GMT")[0]
-                : process.env.NODE_ENV}
-            </td>
+            <td>Date de compilation : </td>
+            <td>{dateTimeStamp}</td>
           </tr>
-          <tr>
-            <td>Hash de version : </td>
-            <td>{gitInfo.commit.shortHash}</td>
-          </tr>
-        </tbody>
+        )}
       </table>
     </main>
   );

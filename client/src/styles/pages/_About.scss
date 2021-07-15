@@ -16,9 +16,10 @@ main#informations {
     }
   }
 
-  #credits,
-  #app-version {
-    margin: 0.5rem auto;
+  #credits {
+    margin: 0.5rem;
+    margin-top: auto;
+
     font-size: 0.9rem;
 
     li {
@@ -30,7 +31,16 @@ main#informations {
     }
   }
 
-  #credits {
-    margin-top: auto;
+  #app-version {
+    margin: 0.5rem auto;
+    font-size: 0.9rem;
+
+    td:first-of-type {
+      text-align: right;
+    }
+    td:last-of-type {
+      text-align: left;
+      padding-left: 0.5ch;
+    }
   }
 }

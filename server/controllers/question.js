@@ -233,6 +233,8 @@ function formatQuestion(data) {
   const answers = badAnswers.slice();
   answers.splice(randomIndex, 0, goodAnswer);
 
+  console.debug(answers);
+
   return {
     subject: data[0].subject,
     goodAnswer: randomIndex,

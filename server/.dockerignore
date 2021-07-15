@@ -1,0 +1,7 @@
+.eslintcache
+.env
+node_modules/
+logs/
+files/
+files-test/
+uploads/

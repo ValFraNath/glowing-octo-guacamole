@@ -1,0 +1,72 @@
+version: "2.4"
+
+services:
+  mariadb_db:
+    image: mariadb:10.6
+    container_name: apothiquiz_db
+    restart: unless-stopped
+    volumes:
+      - apothiquiz_data:/var/lib/mysql/
+    networks:
+      - apothiquiz_network
+    expose:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: __YOUR_PASSWORD_HERE__
+      MYSQL_DATABASE: apothiquizDb
+      MYSQL_USER: apothiquizUser
+      MYSQL_PASSWORD: __YOUR_PASSWORD_HERE__
+    healthcheck:
+      test: "exit 0"
+
+  server:
+    image: valfranath/apothiquiz-server
+    build: server/
+    depends_on:
+      mariadb_db:
+        condition: service_healthy
+
+    container_name: apothiquiz_server
+    restart: unless-stopped
+    networks:
+      - apothiquiz_network
+    environment:
+      PORT: 80
+      ACCESS_TOKEN_KEY: __ACCESS_TMP__
+      REFRESH_TOKEN_KEY: __REFRESH_TMP__
+      DB_HOST: apothiquiz_db
+      DB_USER: apothiquizUser
+      DB_PASSWORD: __YOUR_PASSWORD_HERE__
+      DB_DATABASE: apothiquizDb
+      LDAP_URL: 'ldap://ldap.univ-fcomte.fr'
+      LDAP_DOMAIN: 'ou=people,dc=univ-fcomte,dc=fr'
+
+  client:
+    image: valfranath/apothiquiz-client
+    build: client/
+    container_name: apothiquiz_client
+    restart: unless-stopped
+    networks:
+      - apothiquiz_network
+
+  proxy:
+    image: nginx:1.16.0-alpine
+    depends_on:
+      - server
+      - client
+    container_name: apothiquiz_proxy
+    restart: unless-stopped
+    volumes:
+      - $PWD/rootfs/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - 61100:80
+
+    networks:
+      - apothiquiz_network
+
+volumes:
+  apothiquiz_data:
+
+networks:
+  apothiquiz_network:
+    driver: bridge

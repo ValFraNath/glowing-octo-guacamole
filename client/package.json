@@ -1,7 +1,7 @@
 {
   "name": "client",
   "version": "0.1.0",
-  "proxy": "http://localhost:5035",
+  "proxy": "http://server:5035",
   "private": true,
   "dependencies": {
     "@modulz/radix-icons": "^3.2.0",
@@ -17,10 +17,10 @@
     "find-config": "^1.0.0",
     "node-sass": "^4.14.1",
     "path": "^0.12.7",
+    "preval.macro": "^5.0.0",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-git-info": "^2.0.0",
     "react-query": "^3.8.2",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.1",

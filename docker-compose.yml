@@ -1,0 +1,70 @@
+version: "2.4"
+
+services:
+  mariadb_db:
+    image: mariadb:10.6
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - dev_data:/var/lib/mysql/
+    networks:
+      - dev_network
+    expose:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: apothiquizDb
+      MYSQL_USER: apothiquizUser
+      MYSQL_PASSWORD: apothiquizPassword
+    healthcheck:
+      test: "exit 0"
+      
+  server:
+    build:
+      context: ./server/
+      dockerfile: dev.Dockerfile
+    command: npm run start:watch
+    volumes:
+      - ./server:/usr/app/
+      - /usr/app/node_modules
+    ports:
+      - 5035:5035
+    networks:
+      - dev_network
+    depends_on:
+      mariadb_db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 5035
+      ACCESS_TOKEN_KEY: __ACCESS_TMP__
+      REFRESH_TOKEN_KEY: __REFRESH_TMP__
+      DB_HOST: mariadb_db
+      DB_USER: apothiquizUser
+      DB_DATABASE: apothiquizDb
+      DB_DATABASE_TEST: apothiquizDb
+      DB_PASSWORD: apothiquizPassword
+      LDAP_URL: __LDAP_URL__
+      LDAP_DOMAIN: __LDAP_DOMAIN__
+
+  client:
+    build:
+      context: ./client/
+      dockerfile: dev.Dockerfile
+    command: npm start
+    ports:
+      - 3000:3000
+    volumes:
+      - ./client/:/usr/app/
+      - /usr/app/node_modules
+    networks:
+      - dev_network
+    environment:
+      PORT: 3000
+      HOST: client
+
+volumes:
+  dev_data:
+
+networks:
+  dev_network:
+    driver: bridge
