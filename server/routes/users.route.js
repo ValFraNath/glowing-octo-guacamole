@@ -16,6 +16,13 @@ usersApiRouter.post("/token", HttpControllerWrapper(UserController.generateAcces
 
 usersApiRouter.post("/logout", AuthMiddleware(), HttpControllerWrapper(UserController.logout));
 
+/*BACKEND*/
+usersApiRouter.get("/all", HttpControllerWrapper(UserController.getAllUsers));
+usersApiRouter.post("/delete", AuthMiddleware(), HttpControllerWrapper(UserController.deleteUser));
+usersApiRouter.post("/add", AuthMiddleware(), HttpControllerWrapper(UserController.addUser));
+usersApiRouter.post("/update", AuthMiddleware(), HttpControllerWrapper(UserController.updateUser));
+/*BACKEND*/
+
 usersApiRouter.get("/:pseudo", AuthMiddleware(), HttpControllerWrapper(UserController.getInfos));
 
 usersApiRouter.patch("/:pseudo", AuthMiddleware(), HttpControllerWrapper(UserController.saveInfos));

@@ -4,6 +4,7 @@ import Zip from "adm-zip";
 // eslint-disable-next-line no-unused-vars
 import express from "express";
 
+import { queryFormat, queryPromise } from "../db/database.js";
 import { createDir, deleteFiles, getSortedFiles, moveFile } from "../global/files.js";
 // eslint-disable-next-line no-unused-vars
 import { HttpResponseWrapper } from "../global/HttpControllerWrapper.js";
@@ -23,14 +24,14 @@ const IMAGES_DIR_PATH = path.resolve(
  * @api {post} /import/images Import molecules images
  * @apiName ImportImages
  * @apiGroup Import
- * 
+ *
  * @apiPermission LoggedIn
  * @apiPermission Admin
- * @apiDescription Import images to bind them to molecules; the format of the request must be multipart/form-data! 
- * 
+ * @apiDescription Import images to bind them to molecules; the format of the request must be multipart/form-data!
+ *
  * @apiParam  {File} file The images
  * @apiParam {string} confirmed If "true", the images will be imported, otherwise they will be only tested
- * 
+ *
  * @apiSuccess (201 | 202) {string} message Message explaining what has been done
  * @apiSuccess (201 | 202) {object[]} warnings Array of warnings
  * @apiSuccess (201 | 202) {object} warnings.warning A warning
@@ -57,8 +58,8 @@ const IMAGES_DIR_PATH = path.resolve(
       ],
       "imported": false
     }
-  
- * 
+
+ *
  * @apiError (400) MissingFile No file provided
  * @apiErrorExample 400 Error-Response:
   {
@@ -121,8 +122,8 @@ async function importImages(req, res) {
  * @api {get} /import/images Get the last imported images
  * @apiName GetLastImportedImages
  * @apiGroup Import
- * @apiPermission LoggedIn 
- * @apiPermission Admin 
+ * @apiPermission LoggedIn
+ * @apiPermission Admin
  *
  * @apiSuccess (200) {string} url The url to the images archive
  * @apiSuccess (200) {string} shortpath The path to the archive in the server
@@ -183,4 +184,16 @@ async function deletePreviousImages() {
   await deleteFiles(...files.map((f) => path.resolve(IMAGES_DIR_PATH, f)));
 }
 
-export default { importImages, getLastImportedFile };
+/**BACKEND*/
+async function importUniqueImage(req, res) {
+  const file = [req.file];
+  const deleteUploadedFiles = () => deleteFiles(...file.map((f) => f.path)).catch(() => {});
+  const moleculeName = req.file.originalname.split('.')[0];
+
+  let updateSql = queryFormat('UPDATE molecule SET mo_image = :image WHERE mo_dci = :name ;',
+  {image: Molecule.normalizeDCI(req.file.originalname), name: moleculeName});
+  await queryPromise(updateSql);
+  return await moveFile(req.file.path, path.resolve(IMAGES_DIR_PATH, Molecule.normalizeDCI(req.file.originalname)));
+}
+
+export default { importImages, getLastImportedFile, importUniqueImage };

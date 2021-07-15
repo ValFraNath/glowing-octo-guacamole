@@ -329,7 +329,45 @@ async function saveInfos(req, res) {
   res.sendResponse(200, infos);
 }
 
-export default { login, logout, generateAccessToken, saveInfos, getInfos, getAll, severalGetInfos };
+/** BACKEND */
+async function getAllUsers(req, res) {
+  const sql = "SELECT us_login, us_admin FROM user WHERE us_deleted IS NULL;";
+  const data = await queryPromise(sql);
+  res.sendResponse(200, data);
+}
+
+async function addUser(req){
+  const {login, admin} = req.body;
+  const sql = `INSERT IGNORE INTO user (us_login,us_admin, us_avatar) VALUES ('${login}',${admin},'{"eyes":0,"hands":0,"hat":0,"mouth":0,"colorBody":"#0c04fc","colorBG":"#D3D3D3"}');`;
+  await queryPromise(sql);
+}
+
+async function deleteUser(req){
+  const { selectedLogin } = req.body;
+  const sql = `DELETE FROM user WHERE us_login='${selectedLogin}';`;
+  await queryPromise(sql);
+}
+
+async function updateUser(req){
+  const { selectedLogin, newAdmin } = req.body;
+  const sql = `UPDATE user SET us_admin=${newAdmin} WHERE us_login='${selectedLogin}';`;
+  await queryPromise(sql);
+}
+
+
+export default {
+  login,
+  logout,
+  generateAccessToken,
+  saveInfos,
+  getInfos,
+  getAll,
+  severalGetInfos,
+  getAllUsers,
+  addUser,
+  deleteUser,
+  updateUser,
+};
 
 // ***** INTERNAL FUNCTIONS *****
 
